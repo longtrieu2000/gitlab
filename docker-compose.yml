@@ -10,17 +10,7 @@ services:
       GITLAB_OMNIBUS_CONFIG: |
         external_url 'https://${GITLAB_HOST}'
         gitlab_rails['time_zone'] = '${TZ}'
-        postgresql['enable'] = false
-        redis['enable'] = false
-        gitlab_rails['db_adapter'] = 'postgresql'
-        gitlab_rails['db_encoding'] = 'utf8'
-        gitlab_rails['db_host'] = 'postgres'
-        gitlab_rails['db_port'] = 5432
-        gitlab_rails['db_username'] = 'gitlab'
-        gitlab_rails['db_database'] = 'gitlabhq_production'
-        gitlab_rails['redis_host'] = 'redis'
-        nginx['listen_port'] = 80
-        nginx['listen_https'] = false
+
     ports:
       - "${GITLAB_HTTP_PORT}:80"
       - "${GITLAB_HTTPS_PORT}:443"
