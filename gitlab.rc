@@ -5,6 +5,17 @@
 ##! settings that can be configured by this file, which may be found at:
 ##! https://gitlab.com/gitlab-org/omnibus-gitlab/raw/master/files/gitlab-config-template/gitlab.rb.template
 
+postgresql['enable'] = false
+redis['enable'] = false
+gitlab_rails['db_adapter'] = 'postgresql'
+gitlab_rails['db_encoding'] = 'utf8'
+gitlab_rails['db_host'] = 'postgres'
+gitlab_rails['db_port'] = 5432
+gitlab_rails['db_username'] = 'gitlab'
+gitlab_rails['db_database'] = 'gitlabhq_production'
+gitlab_rails['redis_host'] = 'redis'
+nginx['listen_port'] = 80
+nginx['listen_https'] = false
 
 ## GitLab URL
 ##! URL on which GitLab will be reachable.
