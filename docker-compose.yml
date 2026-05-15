@@ -1,4 +1,7 @@
-version: '3.8'
+# ================================================================
+# GitLab Server Stack - Deploy trên máy 172.23.1.16
+# Bao gồm: GitLab CE + PostgreSQL 17 + Redis 7.4
+# ================================================================
 
 services:
   gitlab:
@@ -8,76 +11,130 @@ services:
     restart: always
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'https://${GITLAB_HOST}'
+        external_url 'http://${GITLAB_HOST}'
         gitlab_rails['time_zone'] = '${TZ}'
 
+        # Disable bundled PostgreSQL and Redis - use external containers
+        postgresql['enable'] = false
+        redis['enable'] = false
+
+        # PostgreSQL connection
+        gitlab_rails['db_adapter'] = 'postgresql'
+        gitlab_rails['db_encoding'] = 'utf8'
+        gitlab_rails['db_host'] = 'postgres'
+        gitlab_rails['db_port'] = 5432
+        gitlab_rails['db_username'] = 'gitlab'
+        gitlab_rails['db_password'] = '${POSTGRES_PASSWORD}'
+        gitlab_rails['db_database'] = 'gitlabhq_production'
+
+        # Redis connection
+        gitlab_rails['redis_host'] = 'redis'
+        gitlab_rails['redis_port'] = 6379
+
+        # NGINX settings
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
+
+        # Monitoring - bind to localhost
+        alertmanager['listen_address'] = 'localhost:9093'
+
+        # Puma (application server) tuning
+        puma['worker_processes'] = 2
+
+        # Sidekiq concurrency
+        sidekiq['concurrency'] = 10
     ports:
       - "${GITLAB_HTTP_PORT}:80"
       - "${GITLAB_HTTPS_PORT}:443"
       - "${GITLAB_SSH_PORT}:22"
     volumes:
-      - ./volumes/config:/etc/gitlab
-      - ./volumes/logs:/var/log/gitlab
-      - ./volumes/data:/var/opt/gitlab
+      - gitlab_config:/etc/gitlab
+      - gitlab_logs:/var/log/gitlab
+      - gitlab_data:/var/opt/gitlab
     depends_on:
-      - redis
-      - postgres
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
     networks:
       - gitlab
+    shm_size: '256m'
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/-/health"]
-      interval: 1m30s
+      interval: 1m
       timeout: 10s
-      retries: 3
+      retries: 5
+      start_period: 5m
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
 
   redis:
-    image: redis:${REDIS_VERSION}
+    image: redis:${REDIS_VERSION}-alpine
     container_name: gitlab_redis
-    command: ["--loglevel", "warning"]
-    volumes:
-      - ./volumes/redis:/data
     restart: always
+    command:
+      - redis-server
+      - --loglevel warning
+      - --maxmemory 256mb
+      - --maxmemory-policy noeviction
+      - --save 60 1000
+    volumes:
+      - redis_data:/data
     networks:
       - gitlab
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
+      interval: 10s
+      timeout: 5s
       retries: 5
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   postgres:
-    image: postgres:${POSTGRES_VERSION}
+    image: postgres:${POSTGRES_VERSION}-alpine
     container_name: gitlab_postgres
     restart: always
     environment:
       POSTGRES_USER: gitlab
       POSTGRES_DB: gitlabhq_production
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     volumes:
-      - ./volumes/postgres:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - gitlab
+    shm_size: '256m'
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "gitlab"]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD-SHELL", "pg_isready -U gitlab -d gitlabhq_production"]
+      interval: 10s
+      timeout: 5s
       retries: 5
-
-  runner:
-    image: gitlab/gitlab-runner:${GITLAB_RUNNER_VERSION}
-    container_name: gitlab_runner
-    restart: always
-    environment:
-      CI_SERVER_URL: https://${GITLAB_HOST}
-    volumes:
-      - ./volumes/runner:/etc/gitlab-runner
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - gitlab
-    depends_on:
-      gitlab:
-        condition: service_healthy
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 networks:
   gitlab:
     driver: bridge
+
+volumes:
+  gitlab_config:
+    driver: local
+  gitlab_logs:
+    driver: local
+  gitlab_data:
+    driver: local
+  redis_data:
+    driver: local
+  postgres_data:
+    driver: local

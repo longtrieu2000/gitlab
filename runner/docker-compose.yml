@@ -1,0 +1,26 @@
+# ================================================================
+# GitLab Runner - Deploy trên máy runner host
+# Kết nối tới GitLab Server tại git host
+# ================================================================
+
+services:
+  runner:
+    image: gitlab/gitlab-runner:${GITLAB_RUNNER_VERSION}
+    container_name: gitlab_runner
+    restart: always
+    environment:
+      TZ: ${TZ}
+    volumes:
+      - runner_config:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+    extra_hosts:
+      - "gitlab.local:${GITLAB_HOST}"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  runner_config:
+    driver: local
