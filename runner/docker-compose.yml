@@ -1,7 +1,18 @@
 # ================================================================
 # GitLab Runner - Deploy trên máy runner host
-# Kết nối tới GitLab Server tại git host
+# Kết nối tới GitLab Server qua HTTPS (self-signed SSL)
 # ================================================================
+#
+# QUAN TRỌNG: Copy file cert từ GitLab Server vào ./ssl/ trước khi chạy
+#   scp user@<gitlab-host>:~/gitlab/ssl/<IP>.crt ./ssl/
+#
+# Cấu trúc thư mục cần có:
+#   runner/
+#   ├── ssl/
+#   │   └── <GITLAB_HOST>.crt    ← cert từ GitLab Server
+#   ├── docker-compose.yml
+#   ├── .env.default
+#   └── makefile
 
 services:
   runner:
@@ -13,6 +24,8 @@ services:
     volumes:
       - runner_config:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock
+      # Mount self-signed cert để runner trust GitLab
+      - ./ssl/${GITLAB_HOST}.crt:/etc/gitlab-runner/certs/${GITLAB_HOST}.crt:ro
     extra_hosts:
       - "gitlab.local:${GITLAB_HOST}"
     logging:

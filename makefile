@@ -1,13 +1,27 @@
 DOCKER_COMPOSE := docker compose
 
-.PHONY: all up down logs restart ps reconfigure backup bash version
+.PHONY: all up down logs restart ps reconfigure backup bash version password ssl
 
 all: up
 
-## Copy env nếu chưa có và khởi động
-up:
+## Sinh SSL cert và khởi động
+up: ssl
 	@cp -n .env.default .env 2>/dev/null || true
 	@$(DOCKER_COMPOSE) up -d
+
+## Sinh self-signed SSL certificate (nếu chưa có)
+ssl:
+	@. ./.env 2>/dev/null || . ./.env.default; \
+	if [ ! -f "./ssl/$${GITLAB_HOST}.crt" ]; then \
+		echo "🔐 Sinh SSL Self-Signed Certificate..."; \
+		bash scripts/generate-ssl.sh; \
+	else \
+		echo "✅ SSL cert đã tồn tại: ./ssl/$${GITLAB_HOST}.crt"; \
+	fi
+
+## Sinh lại SSL cert (force)
+ssl-renew:
+	@bash scripts/generate-ssl.sh
 
 down:
 	@$(DOCKER_COMPOSE) down

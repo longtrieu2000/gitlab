@@ -1,43 +1,51 @@
-# GitLab Runner
+# GitLab Runner (Self-Signed SSL)
 
-Runner được deploy riêng trên máy runner host, kết nối tới GitLab Server tại git host.
+Runner deploy riêng trên máy runner host, kết nối tới GitLab Server qua **HTTPS** (self-signed cert).
+
+## Chuẩn bị
+
+**Bắt buộc**: Copy cert từ GitLab Server trước khi chạy:
+
+```bash
+mkdir -p ssl
+scp user@<gitlab-host>:~/gitlab/ssl/<IP>.crt ./ssl/
+```
 
 ## Quick Start
 
 ```bash
-# 1. Copy env file và chỉnh sửa token
+# 1. Copy env file và chỉnh sửa
 cp .env.default .env
-vim .env  # điền REGISTRATION_TOKEN, GITLAB_HOST
+vim .env  # điền REGISTRATION_TOKEN, GITLAB_HOST, GITLAB_URL
 
-# 2. Khởi động
+# 2. Copy cert (xem phần Chuẩn bị ở trên)
+
+# 3. Khởi động (auto-check cert)
 make up
 
-# 3. Đăng ký runner
+# 4. Đăng ký runner
 make register
 
-# 4. Kiểm tra
+# 5. Kiểm tra
 make list
 ```
 
 ## Lấy Registration Token
 
-### GitLab 18.x (New Runner Registration Flow)
-
-1. Vào GitLab: **Admin > CI/CD > Runners** (hoặc **Project > Settings > CI/CD > Runners**)
-2. Click **"New instance runner"** (hoặc **"New project runner"**)
-3. Chọn platform **Linux**, thêm tags, mô tả
-4. Click **"Create runner"**
-5. Copy **runner authentication token** (bắt đầu bằng `glrt-...`)
-6. Paste vào `REGISTRATION_TOKEN` trong file `.env`
+1. Đăng nhập GitLab: `https://<GITLAB_HOST>:3080`
+2. **Admin Area → CI/CD → Runners → New instance runner**
+3. Copy token (dạng `glrt-...`)
+4. Paste vào `REGISTRATION_TOKEN` trong `.env`
 
 ## Makefile Commands
 
 | Command | Mô tả |
 |---|---|
-| `make up` | Khởi động runner container |
+| `make up` | Khởi động (auto check cert) |
 | `make down` | Tắt runner |
 | `make logs` | Xem logs realtime |
-| `make register` | Đăng ký runner (Docker executor) |
-| `make register-shell` | Đăng ký runner (Shell executor) |
+| `make register` | Đăng ký (Docker executor + trust cert) |
+| `make register-shell` | Đăng ký (Shell executor + trust cert) |
 | `make unregister` | Xoá tất cả đăng ký |
-| `make list` | Liệt kê runners đã đăng ký |
+| `make list` | Liệt kê runners |
+| `make check-cert` | Kiểm tra cert đã copy chưa |

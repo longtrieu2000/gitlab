@@ -1,9 +1,6 @@
-## GitLab configuration settings
-##! Nếu cần override cấu hình ngoài GITLAB_OMNIBUS_CONFIG trong docker-compose,
-##! mount file này vào /etc/gitlab/gitlab.rb
-##!
-##! Lưu ý: GITLAB_OMNIBUS_CONFIG trong docker-compose.yml được ưu tiên trước file này.
-##! File này chỉ dùng khi cần cấu hình bổ sung.
+## GitLab configuration settings (SSL Self-Signed)
+##! File này dùng khi cần override cấu hình ngoài GITLAB_OMNIBUS_CONFIG
+##! Lưu ý: GITLAB_OMNIBUS_CONFIG trong docker-compose.yml được ưu tiên hơn.
 
 ################################################################
 ## Core: Disable bundled services (using external containers)
@@ -31,11 +28,16 @@ gitlab_rails['redis_host'] = 'redis'
 gitlab_rails['redis_port'] = 6379
 
 ################################################################
-## GitLab NGINX
+## NGINX SSL (Self-Signed)
 ################################################################
 
-nginx['listen_port'] = 80
-nginx['listen_https'] = false
+nginx['listen_port'] = 443
+nginx['listen_https'] = true
+nginx['redirect_http_to_https'] = true
+nginx['ssl_protocols'] = 'TLSv1.2 TLSv1.3'
+
+# Let's Encrypt - disabled for self-signed
+letsencrypt['enable'] = false
 
 ################################################################
 ## Monitoring
@@ -55,7 +57,6 @@ alertmanager['listen_address'] = 'localhost:9093'
 #gitlab_rails['smtp_domain'] = "gmail.com"
 #gitlab_rails['smtp_authentication'] = "login"
 #gitlab_rails['smtp_enable_starttls_auto'] = true
-#gitlab_rails['smtp_tls'] = false
 
 #gitlab_rails['gitlab_email_from'] = 'gitlab@yourdomain.com'
 #gitlab_rails['gitlab_email_reply_to'] = 'noreply@yourdomain.com'

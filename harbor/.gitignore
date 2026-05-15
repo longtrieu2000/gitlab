@@ -1,0 +1,14 @@
+# SSL certificates (generated, don't commit private keys)
+ssl/*.key
+ssl/*.csr
+ssl/*.srl
+ssl/*.pem
+
+# Environment files with secrets
+.env
+
+# Harbor installer (downloaded)
+harbor-installer/
+
+# Ignore data volumes
+/data/

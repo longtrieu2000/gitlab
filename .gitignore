@@ -1,0 +1,9 @@
+# SSL certificates (generated, don't commit private keys)
+ssl/*.key
+ssl/*.pem
+
+# Environment files with secrets
+.env
+
+# Docker volumes
+volumes/

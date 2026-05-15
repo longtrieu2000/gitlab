@@ -1,5 +1,5 @@
 # ================================================================
-# GitLab Server Stack - Deploy trên máy 172.23.1.16
+# GitLab Server Stack - Deploy trên máy git host
 # Bao gồm: GitLab CE + PostgreSQL 17 + Redis 7.4
 # ================================================================
 
@@ -60,7 +60,7 @@ services:
       - gitlab
     shm_size: '256m'
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/-/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost/-/health" ]
       interval: 1m
       timeout: 10s
       retries: 5
@@ -86,7 +86,7 @@ services:
     networks:
       - gitlab
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -112,7 +112,7 @@ services:
       - gitlab
     shm_size: '256m'
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gitlab -d gitlabhq_production"]
+      test: [ "CMD-SHELL", "pg_isready -U gitlab -d gitlabhq_production" ]
       interval: 10s
       timeout: 5s
       retries: 5
