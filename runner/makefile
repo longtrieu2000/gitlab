@@ -50,7 +50,6 @@ register:
 		--docker-privileged \
 		--docker-volumes "/var/run/docker.sock:/var/run/docker.sock" \
 		--description "runner-docker" \
-		--tag-list "docker,linux" \
 		--tls-ca-file "/etc/gitlab-runner/certs/$${GITLAB_HOST}.crt"
 
 ## Đăng ký runner với Shell executor (chạy trực tiếp trên host)
@@ -63,7 +62,6 @@ register-shell:
 		--token "$${REGISTRATION_TOKEN}" \
 		--executor shell \
 		--description "runner-shell" \
-		--tag-list "shell,linux" \
 		--tls-ca-file "/etc/gitlab-runner/certs/$${GITLAB_HOST}.crt"
 
 ## Xoá đăng ký runner
