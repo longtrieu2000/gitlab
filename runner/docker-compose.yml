@@ -8,6 +8,8 @@
 #
 # Cấu trúc thư mục cần có:
 #   runner/
+#   ├── config/
+#   │   └── config.toml           ← auto-created on first `make up`
 #   ├── ssl/
 #   │   └── <GITLAB_HOST>.crt    ← cert từ GitLab Server
 #   ├── docker-compose.yml
@@ -22,7 +24,7 @@ services:
     environment:
       TZ: ${TZ}
     volumes:
-      - runner_config:/etc/gitlab-runner
+      - ./config:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock
       # Mount self-signed cert để runner trust GitLab
       - ./ssl/${GITLAB_HOST}.crt:/etc/gitlab-runner/certs/${GITLAB_HOST}.crt:ro
@@ -34,6 +36,4 @@ services:
         max-size: "10m"
         max-file: "3"
 
-volumes:
-  runner_config:
-    driver: local
+

@@ -5,6 +5,8 @@ DOCKER_COMPOSE := docker compose
 ## Khởi động runner
 up: check-cert
 	@cp -n .env.default .env 2>/dev/null || true
+	@mkdir -p ./config
+	@touch ./config/config.toml
 	@$(DOCKER_COMPOSE) up -d
 
 ## Kiểm tra cert trước khi khởi động
