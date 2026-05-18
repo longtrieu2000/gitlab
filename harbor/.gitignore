@@ -8,7 +8,7 @@ ssl/*.pem
 .env
 
 # Harbor installer (downloaded)
-harbor-installer/
+#harbor-installer/
 
 # Ignore data volumes
 /data/
