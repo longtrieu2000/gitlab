@@ -130,15 +130,22 @@ data_volume: ${HARBOR_DATA_DIR}
 
 trivy:
   ignore_unfixed: false
-  security_check: vuln,config,secret
   skip_update: false
+  skip_java_db_update: false
+  db_repository: ghcr.io/aquasecurity/trivy-db
+  java_db_repository: ghcr.io/aquasecurity/trivy-java-db
+  offline_scan: false
+  security_check: vuln,config,secret
   insecure: false
+  timeout: 5m0s
 
 jobservice:
   max_job_workers: 10
+  max_job_duration_hours: 24
   job_loggers:
     - STD_OUTPUT
     - FILE
+  logger_sweeper_duration: 1
 
 notification:
   webhook_job_max_retry: 3
