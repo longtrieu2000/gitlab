@@ -51,6 +51,17 @@ openssl req -sha512 -new \
     -out "${CERT_DIR}/${HARBOR_HOST}.csr"
 
 # ---- 3. Tạo v3 extensions file (SAN) ----
+# Kiểm tra xem HARBOR_HOST là IP hay Domain để cấu hình v3.ext chính xác
+if [[ "$HARBOR_HOST" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    ALT_NAMES="IP.1 = ${HARBOR_HOST}
+DNS.1 = localhost
+IP.2 = 127.0.0.1"
+else
+    ALT_NAMES="DNS.1 = ${HARBOR_HOST}
+DNS.2 = localhost
+IP.1 = 127.0.0.1"
+fi
+
 cat > "${CERT_DIR}/v3.ext" <<EOF
 authorityKeyIdentifier=keyid,issuer
 basicConstraints=CA:FALSE
@@ -59,10 +70,7 @@ extendedKeyUsage = serverAuth
 subjectAltName = @alt_names
 
 [alt_names]
-IP.1 = ${HARBOR_HOST}
-DNS.1 = ${HARBOR_HOST}
-DNS.2 = localhost
-IP.2 = 127.0.0.1
+${ALT_NAMES}
 EOF
 
 echo "📄 [4/4] Ký server certificate với CA..."
