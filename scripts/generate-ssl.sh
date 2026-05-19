@@ -30,6 +30,13 @@ echo "================================================"
 # Tạo thư mục
 mkdir -p "${CERT_DIR}"
 
+# Kiểm tra xem GITLAB_HOST là IP hay Domain để cấu hình subjectAltName (SAN) cho đúng
+if [[ "$GITLAB_HOST" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    SAN="IP:${GITLAB_HOST},DNS:localhost,IP:127.0.0.1"
+else
+    SAN="DNS:${GITLAB_HOST},DNS:localhost,IP:127.0.0.1"
+fi
+
 # Sinh private key + certificate
 openssl req -x509 -nodes \
     -days ${CERT_DAYS} \
@@ -37,7 +44,7 @@ openssl req -x509 -nodes \
     -keyout "${CERT_DIR}/${GITLAB_HOST}.key" \
     -out "${CERT_DIR}/${GITLAB_HOST}.crt" \
     -subj "/C=VN/ST=HoChiMinh/L=HoChiMinh/O=Self-Hosted/OU=GitLab/CN=${GITLAB_HOST}" \
-    -addext "subjectAltName=IP:${GITLAB_HOST},DNS:${GITLAB_HOST},DNS:localhost,IP:127.0.0.1"
+    -addext "subjectAltName=${SAN}"
 
 # Đặt quyền
 chmod 600 "${CERT_DIR}/${GITLAB_HOST}.key"
