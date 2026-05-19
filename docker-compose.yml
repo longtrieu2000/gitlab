@@ -46,6 +46,21 @@ services:
 
         # Sidekiq concurrency
         sidekiq['concurrency'] = 10
+
+        # LDAP Configuration for LLDAP
+        gitlab_rails['ldap_enabled'] = true
+        gitlab_rails['ldap_servers'] = YAML.load <<-EOS
+          main:
+            label: 'LLDAP Login'
+            host: '${LLDAP_HOST}'
+            port: ${LLDAP_PORT}
+            uid: 'uid'
+            bind_dn: '${LLDAP_BIND_DN}'
+            password: '${LLDAP_BIND_PASSWORD}'
+            encryption: 'plain'
+            base: 'ou=people,${LLDAP_BASE_DN}'
+            user_filter: ''
+        EOS
     ports:
       - "${GITLAB_HTTP_PORT}:80"
       - "${GITLAB_HTTPS_PORT}:443"
