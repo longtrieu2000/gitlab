@@ -69,7 +69,7 @@ services:
       - gitlab_config:/etc/gitlab
       - gitlab_logs:/var/log/gitlab
       - gitlab_data:/var/opt/gitlab
-      - ./scripts/ssl:/etc/gitlab/ssl:ro
+      - ./ssl:/etc/gitlab/ssl
     depends_on:
       redis:
         condition: service_healthy
