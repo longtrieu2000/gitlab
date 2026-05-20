@@ -12,13 +12,19 @@ up: check-cert
 ## Kiểm tra cert trước khi khởi động
 check-cert:
 	@. ./.env 2>/dev/null || . ./.env.default; \
-	if [ ! -f "./ssl/$${GITLAB_HOST}.crt" ]; then \
-		echo "❌ Chưa có SSL cert!"; \
-		echo "   Copy cert từ GitLab Server:"; \
-		echo "   scp user@$${GITLAB_HOST}:~/gitlab/ssl/$${GITLAB_HOST}.crt ./ssl/"; \
-		exit 1; \
+	if [ "$${SSL_TYPE}" = "public" ] || [ "$${SSL_TYPE}" = "letsencrypt" ]; then \
+		echo "✅ Đang dùng Public CA (Let's Encrypt). Bỏ qua kiểm tra cert local."; \
+		mkdir -p ./ssl; \
+		touch "./ssl/$${GITLAB_HOST}.crt"; \
 	else \
-		echo "✅ Cert found: ./ssl/$${GITLAB_HOST}.crt"; \
+		if [ ! -f "./ssl/$${GITLAB_HOST}.crt" ]; then \
+			echo "❌ Chưa có SSL cert!"; \
+			echo "   Copy cert từ GitLab Server:"; \
+			echo "   scp user@$${GITLAB_HOST}:~/gitlab/ssl/$${GITLAB_HOST}.crt ./ssl/"; \
+			exit 1; \
+		else \
+			echo "✅ Cert found: ./ssl/$${GITLAB_HOST}.crt"; \
+		fi \
 	fi
 
 ## Tắt runner
@@ -41,6 +47,10 @@ ps:
 register:
 	@echo "=== Đăng ký GitLab Runner (Docker executor) ==="
 	@. ./.env; \
+	TLS_FLAGS=""; \
+	if [ "$${SSL_TYPE}" != "public" ] && [ "$${SSL_TYPE}" != "letsencrypt" ]; then \
+		TLS_FLAGS="--tls-ca-file /etc/gitlab-runner/certs/$${GITLAB_HOST}.crt"; \
+	fi; \
 	$(DOCKER_COMPOSE) exec runner gitlab-runner register \
 		--non-interactive \
 		--url "$${GITLAB_URL}" \
@@ -50,19 +60,23 @@ register:
 		--docker-privileged \
 		--docker-volumes "/var/run/docker.sock:/var/run/docker.sock" \
 		--description "runner-docker" \
-		--tls-ca-file "/etc/gitlab-runner/certs/$${GITLAB_HOST}.crt"
+		$$TLS_FLAGS
 
 ## Đăng ký runner với Shell executor (chạy trực tiếp trên host)
 register-shell:
 	@echo "=== Đăng ký GitLab Runner (Shell executor) ==="
 	@. ./.env; \
+	TLS_FLAGS=""; \
+	if [ "$${SSL_TYPE}" != "public" ] && [ "$${SSL_TYPE}" != "letsencrypt" ]; then \
+		TLS_FLAGS="--tls-ca-file /etc/gitlab-runner/certs/$${GITLAB_HOST}.crt"; \
+	fi; \
 	$(DOCKER_COMPOSE) exec runner gitlab-runner register \
 		--non-interactive \
 		--url "$${GITLAB_URL}" \
 		--token "$${REGISTRATION_TOKEN}" \
 		--executor shell \
 		--description "runner-shell" \
-		--tls-ca-file "/etc/gitlab-runner/certs/$${GITLAB_HOST}.crt"
+		$$TLS_FLAGS
 
 ## Xoá đăng ký runner
 unregister:

@@ -9,19 +9,33 @@ up: ssl
 	@cp -n .env.default .env 2>/dev/null || true
 	@$(DOCKER_COMPOSE) up -d
 
-## Sinh self-signed SSL certificate (nếu chưa có)
+## Sinh SSL certificate (tự động phát hiện loại SSL_TYPE)
 ssl:
 	@. ./.env 2>/dev/null || . ./.env.default; \
-	if [ ! -f "./ssl/$${GITLAB_HOST}.crt" ]; then \
-		echo "🔐 Sinh SSL Self-Signed Certificate..."; \
-		bash scripts/generate-ssl.sh; \
+	if [ "$${SSL_TYPE}" = "letsencrypt" ]; then \
+		if [ ! -f "./ssl/$${GITLAB_HOST}.crt" ]; then \
+			echo "🔐 Thiết lập SSL Let's Encrypt..."; \
+			bash scripts/setup-letsencrypt.sh; \
+		else \
+			echo "✅ Let's Encrypt SSL cert đã có: ./ssl/$${GITLAB_HOST}.crt"; \
+		fi \
 	else \
-		echo "✅ SSL cert đã tồn tại: ./ssl/$${GITLAB_HOST}.crt"; \
+		if [ ! -f "./ssl/$${GITLAB_HOST}.crt" ]; then \
+			echo "🔐 Sinh SSL Self-Signed Certificate..."; \
+			bash scripts/generate-ssl.sh; \
+		else \
+			echo "✅ Self-Signed SSL cert đã có: ./ssl/$${GITLAB_HOST}.crt"; \
+		fi \
 	fi
 
-## Sinh lại SSL cert (force)
+## Sinh lại hoặc import lại SSL cert (force)
 ssl-renew:
-	@bash scripts/generate-ssl.sh
+	@. ./.env 2>/dev/null || . ./.env.default; \
+	if [ "$${SSL_TYPE}" = "letsencrypt" ]; then \
+		bash scripts/setup-letsencrypt.sh; \
+	else \
+		bash scripts/generate-ssl.sh; \
+	fi
 
 down:
 	@$(DOCKER_COMPOSE) down
