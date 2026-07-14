@@ -1,0 +1,12 @@
+# SSL certificates (generated, don't commit private keys)
+ssl/*.key
+ssl/*.pem
+
+# Environment files with secrets
+.env
+
+# Vault data (Raft storage)
+data/
+
+# Init keys (CRITICAL - never commit!)
+vault-init-keys.json

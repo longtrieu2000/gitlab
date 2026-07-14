@@ -1,0 +1,46 @@
+# ================================================================
+# HashiCorp Vault - Production Deployment
+# Storage: Integrated Raft | TLS: Let's Encrypt / Self-Signed
+# ================================================================
+
+services:
+  vault:
+    image: hashicorp/vault:${VAULT_VERSION}
+    container_name: vault
+    restart: always
+    cap_add:
+      - IPC_LOCK
+    environment:
+      TZ: ${TZ}
+      # Trỏ config vào thư mục config mount
+      VAULT_ADDR: "https://127.0.0.1:8200"
+      VAULT_API_ADDR: "https://${VAULT_HOST}:${VAULT_API_PORT}"
+      VAULT_CLUSTER_ADDR: "https://${VAULT_HOST}:${VAULT_CLUSTER_PORT}"
+      # Bỏ qua verify TLS khi CLI gọi nội bộ (nếu dùng self-signed)
+      # VAULT_SKIP_VERIFY: "true"
+    command: vault server -config=/vault/config/vault.hcl
+    ports:
+      - "${VAULT_API_PORT}:8200"
+      - "${VAULT_CLUSTER_PORT}:8201"
+    volumes:
+      - ./config/vault.hcl:/vault/config/vault.hcl:ro
+      - ./ssl:/vault/ssl:ro
+      - vault_data:/vault/data
+      - vault_logs:/vault/logs
+    healthcheck:
+      test: ["CMD", "vault", "status", "-tls-skip-verify"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+volumes:
+  vault_data:
+    driver: local
+  vault_logs:
+    driver: local
