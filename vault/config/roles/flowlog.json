@@ -1,0 +1,17 @@
+{
+  "role_type": "jwt",
+  "user_claim": "user_email",
+  "bound_audiences": [
+    "https://vault.cloudsb.space:8200"
+  ],
+  "bound_claims": {
+    "project_path": "htm_sdn/cloudvpcflowlog/flow_log_controller",
+    "ref": "main",
+    "ref_type": "branch",
+    "ref_protected": "true"
+  },
+  "token_policies": [
+    "flowlog"
+  ],
+  "token_ttl": "15m"
+}
