@@ -25,6 +25,7 @@ services:
       TZ: ${TZ}
     volumes:
       - ./config:/etc/gitlab-runner
+      # Mount Docker socket để runner có thể tạo các job container trên host
       - /var/run/docker.sock:/var/run/docker.sock
       # Mount self-signed cert để runner trust GitLab
       - ./ssl/${GITLAB_HOST}.crt:/etc/gitlab-runner/certs/${GITLAB_HOST}.crt:ro
