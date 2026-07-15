@@ -8,6 +8,8 @@ services:
     image: postgres:${POSTGRES_VERSION}-alpine
     container_name: sonarqube_db
     restart: always
+    dns:
+      - 172.23.4.25
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -33,6 +35,8 @@ services:
     image: sonarqube:${SONARQUBE_VERSION}
     container_name: sonarqube
     restart: always
+    dns:
+      - 172.23.4.25
     depends_on:
       db:
         condition: service_healthy
@@ -69,6 +73,8 @@ services:
     image: nginx:alpine
     container_name: sonarqube_nginx
     restart: always
+    dns:
+      - 172.23.4.25
     ports:
       - "${SONARQUBE_PORT}:443"
     environment:

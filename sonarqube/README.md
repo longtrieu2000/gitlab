@@ -28,6 +28,10 @@ Triển khai [SonarQube Community Build](https://www.sonarqube.org/) sử dụng
 > echo "vm.max_map_count=524288" | sudo tee -a /etc/sysctl.conf
 > ```
 
+> [!NOTE]
+> **Cấu hình DNS Server:**
+> Để phục vụ việc phân giải tên miền nội bộ (ví dụ: kết nối tới GitLab, LDAP, Mail server,...), các service trong `docker-compose.yml` đã được định nghĩa DNS Server trỏ về `172.23.4.25`.
+
 ---
 
 ## Quick Start
