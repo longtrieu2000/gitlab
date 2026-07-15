@@ -44,6 +44,8 @@ services:
       SONAR_JDBC_USERNAME: ${DB_USER}
       SONAR_JDBC_PASSWORD: ${DB_PASSWORD}
       SONAR_JDBC_URL: jdbc:postgresql://db:5432/${DB_NAME}
+      SONAR_WEB_SYSTEMPASSCODE: xxxxx
+      SONAR_CORE_SERVERBASEURL: https://sonarqube.cloudsb.space:9000
       TZ: ${TZ}
     ulimits:
       nofile:
