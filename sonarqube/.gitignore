@@ -1,0 +1,11 @@
+# SSL certificates (generated, don't commit private keys)
+ssl/*.pem
+
+# Environment files with secrets
+.env
+
+# Persistent directories
+data/
+extensions/
+logs/
+db_data/
