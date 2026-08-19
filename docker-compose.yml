@@ -35,8 +35,8 @@ services:
         nginx['listen_port'] = 443
         nginx['listen_https'] = true
         nginx['redirect_http_to_https'] = true
-        nginx['ssl_certificate'] = "/etc/gitlab/ssl/${GITLAB_HOST}.crt"
-        nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/${GITLAB_HOST}.key"
+        nginx['ssl_certificate'] = "/etc/gitlab/ssl/cloudsb.space.fullchain.pem"
+        nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/cloudsb.space.privkey.pem"
 
         # Monitoring - bind to localhost
         alertmanager['listen_address'] = 'localhost:9093'
@@ -46,8 +46,7 @@ services:
 
         # Sidekiq concurrency
         sidekiq['concurrency'] = 10
-
-        # Email & SMTP Settings (Google / Gmail)
+                # Email & SMTP Settings (Google / Gmail)
         gitlab_rails['gitlab_email_enabled'] = true
         gitlab_rails['gitlab_email_from'] = '${SMTP_FROM}'
         gitlab_rails['gitlab_email_reply_to'] = '${SMTP_FROM}'
@@ -62,7 +61,6 @@ services:
         gitlab_rails['smtp_enable_starttls_auto'] = true
         gitlab_rails['smtp_tls'] = false
         gitlab_rails['smtp_openssl_verify_mode'] = 'peer'
-
         # LDAP Configuration for LLDAP
         gitlab_rails['ldap_enabled'] = true
         gitlab_rails['ldap_servers'] = YAML.load <<-EOS
