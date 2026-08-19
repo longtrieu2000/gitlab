@@ -10,11 +10,23 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 cd "${ROOT_DIR}"
 
-if [ -f .env ]; then
-    source .env
-elif [ -f .env.default ]; then
-    source .env.default
-fi
+load_env_file() {
+    local file="$1"
+    if [ -f "${file}" ]; then
+        while IFS='=' read -r key value || [ -n "$key" ]; do
+            [[ "$key" =~ ^[[:space:]]*# ]] && continue
+            [[ -z "$key" ]] && continue
+            key=$(echo "$key" | tr -d '[:space:]')
+            value=$(echo "$value" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^["'"'"']//' -e 's/["'"'"']$//')
+            if [[ "$key" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+                export "$key"="$value"
+            fi
+        done < "${file}"
+    fi
+}
+
+load_env_file .env.default
+load_env_file .env
 
 echo "================================================================="
 echo "  🚀 TRÌNH HỖ TRỢ NÂNG CẤP GITLAB CE THEO LỘ TRÌNH (UPGRADE PATH)"

@@ -9,15 +9,23 @@ set -euo pipefail
 # Chuyển về thư mục chứa script để đảm bảo chạy đúng đường dẫn tương đối
 cd "$(dirname "$0")/.."
 
-# Load biến từ .env hoặc .env.default
-if [ -f .env ]; then
-    source .env
-elif [ -f .env.default ]; then
-    source .env.default
-else
-    echo "❌ Không tìm thấy .env hoặc .env.default"
-    exit 1
-fi
+load_env_file() {
+    local file="$1"
+    if [ -f "${file}" ]; then
+        while IFS='=' read -r key value || [ -n "$key" ]; do
+            [[ "$key" =~ ^[[:space:]]*# ]] && continue
+            [[ -z "$key" ]] && continue
+            key=$(echo "$key" | tr -d '[:space:]')
+            value=$(echo "$value" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^["'"'"']//' -e 's/["'"'"']$//')
+            if [[ "$key" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+                export "$key"="$value"
+            fi
+        done < "${file}"
+    fi
+}
+
+load_env_file .env.default
+load_env_file .env
 
 GITLAB_HOST="${GITLAB_HOST:-gitlab.cloud.sb}"
 CERT_DIR="./ssl"
