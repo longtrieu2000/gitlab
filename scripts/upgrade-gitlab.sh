@@ -57,28 +57,27 @@ fi
 CURRENT_VER="${GITLAB_CE_VERSION:-18.11.3-ce.0}"
 echo ""
 echo "================================================================="
-echo "  📋 LỘ TRÌNH NÂNG CẤP CHUẨN CỦA GITLAB (TỪ 18.x LÊN 19.x):"
+echo "  📋 LỘ TRÌNH NÂNG CẤP BẢO MẬT CHUẨN CỦA GITLAB (TỪ 18.11.3 -> 19.2.4):"
 echo "================================================================="
 echo "   [Hiện tại] : ${CURRENT_VER}"
-echo "   [Bước 1]   : 18.11.3-ce.0 (Điểm dừng cuối cùng của nhánh 18)"
-echo "   [Bước 2]   : 19.0.0-ce.0  (Điểm dừng bắt buộc của Major 19)"
-echo "   [Bước 3]   : 19.2.0-ce.0  (Phiên bản mới nhất mong muốn)"
+echo "   [Bước 1]   : 19.0.8-ce.0 (Điểm dừng bắt buộc Major 19 + Vá bảo mật)"
+echo "   [Bước 2]   : 19.2.4-ce.0 (Phiên bản đích mới nhất & an toàn nhất)"
 echo "================================================================="
 echo ""
 echo "👉 Chọn phiên bản bạn muốn nâng cấp lên trong bước này:"
-echo "   1) 18.11.3-ce.0"
-echo "   2) 19.0.0-ce.0"
-echo "   3) 19.2.0-ce.0"
+echo "   1) 19.0.8-ce.0 (Khuyên dùng cho Bước 1 - Điểm dừng Major 19)"
+echo "   2) 19.2.4-ce.0 (Khuyên dùng cho Bước 2 - Bản mới nhất khuyến nghị)"
+echo "   3) 19.1.6-ce.0"
 echo "   4) Nhập phiên bản tùy chỉnh (Custom Tag)"
 echo "   5) Hủy bỏ (Thoát)"
 echo ""
 read -rp "Chọn số (1-5): " CHOICE
 
 case "$CHOICE" in
-    1) TARGET_VERSION="18.11.3-ce.0" ;;
-    2) TARGET_VERSION="19.0.0-ce.0" ;;
-    3) TARGET_VERSION="19.2.0-ce.0" ;;
-    4) read -rp "Nhập tag GitLab CE (ví dụ: 19.1.0-ce.0): " TARGET_VERSION ;;
+    1) TARGET_VERSION="19.0.8-ce.0" ;;
+    2) TARGET_VERSION="19.2.4-ce.0" ;;
+    3) TARGET_VERSION="19.1.6-ce.0" ;;
+    4) read -rp "Nhập tag GitLab CE (ví dụ: 19.2.4-ce.0): " TARGET_VERSION ;;
     *) echo "❌ Đã hủy quá trình nâng cấp."; exit 0 ;;
 esac
 
