@@ -1,6 +1,6 @@
 DOCKER_COMPOSE := docker compose
 
-.PHONY: all up down logs restart ps reconfigure backup bash version password ssl
+.PHONY: all up down logs restart ps reconfigure backup backup-all restore-all check-migrations upgrade bash version password ssl ssl-renew
 
 all: up
 
@@ -52,6 +52,23 @@ ps:
 reconfigure:
 	@$(DOCKER_COMPOSE) exec gitlab gitlab-ctl reconfigure
 
+## Backup toàn diện hệ thống từ A -> Z (Application, PostgreSQL Dump, Secrets, SSL, Config)
+backup-all:
+	@bash scripts/backup-all.sh
+
+## Khôi phục toàn diện hệ thống từ file nén backup
+restore-all:
+	@bash scripts/restore-all.sh $(FILE)
+
+## Kiểm tra trạng thái Batched Background Migrations & độ sẵn sàng nâng cấp
+check-migrations:
+	@bash scripts/check-migrations.sh
+
+## Hướng dẫn và thực hiện nâng cấp GitLab theo lộ trình chuẩn
+upgrade:
+	@bash scripts/upgrade-gitlab.sh
+
+## Backup mặc định qua Rake task
 backup:
 	@$(DOCKER_COMPOSE) exec gitlab gitlab-rake gitlab:backup:create
 

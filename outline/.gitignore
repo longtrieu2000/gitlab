@@ -1,13 +1,10 @@
 # SSL certificates (generated, don't commit private keys)
-ssl/*.key
 ssl/*.pem
+ssl/*.crt
+ssl/*.key
 
 # Environment files with secrets
 .env
 
-# Docker volumes
-volumes/
-
-# Backups and temporary restore folders
-backups/
-restore_temp_*/
+# Data
+data/

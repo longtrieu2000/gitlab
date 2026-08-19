@@ -1,0 +1,55 @@
+services:
+  outline:
+    image: docker.getoutline.com/outlinewiki/outline:latest
+    env_file: .env
+    network_mode: "host"
+    volumes:
+      - storage-data:/var/lib/outline/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    network_mode: "host"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 30s
+      retries: 3
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    env_file: .env
+    network_mode: "host"
+    volumes:
+      - database-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "outline", "-U", "user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      POSTGRES_USER: 'admin'
+      POSTGRES_PASSWORD: '123qweaA'
+      POSTGRES_DB: 'outline'
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:stable-alpine
+    network_mode: "host"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - outline
+    restart: unless-stopped
+
+volumes:
+  storage-data:
+  database-data:
