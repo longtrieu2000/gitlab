@@ -98,16 +98,33 @@ else
     cp .env.default .env
     sed -i "s/^GITLAB_CE_VERSION=.*/GITLAB_CE_VERSION=${TARGET_VERSION}/" .env
 fi
+
+# Export ngay biến mới vào shell hiện tại để Docker Compose nhận đúng version mới
+export GITLAB_CE_VERSION="${TARGET_VERSION}"
 echo "   ✅ Đã cập nhật .env: GITLAB_CE_VERSION=${TARGET_VERSION}"
 
-# 5. Pull image mới và Restart
+# 5. Hỏi xác nhận Recreate Container
+echo ""
+read -rp "👉 Bạn có muốn Pull image và Recreate container GitLab ngay bây giờ không? (Y/n): " AUTO_UP
+if [[ "$AUTO_UP" =~ ^[Nn]$ ]]; then
+    echo ""
+    echo "================================================================="
+    echo "  ✅ ĐÃ CẬP NHẬT .env THÀNH CÔNG VỚI VERSION: ${TARGET_VERSION}"
+    echo "  👉 Khi bạn đã sẵn sàng bảo trì, hãy chạy lệnh sau để Recreate:"
+    echo ""
+    echo "     docker compose pull gitlab && docker compose --env-file .env up -d --force-recreate gitlab"
+    echo "================================================================="
+    exit 0
+fi
+
+# 6. Pull image mới và Recreate Container
 echo ""
 echo "📥 [Bước 4] Đang pull image gitlab/gitlab-ce:${TARGET_VERSION}..."
 docker compose pull gitlab
 
 echo ""
-echo "🔄 [Bước 5] Đang khởi động lại GitLab với phiên bản mới..."
-docker compose up -d gitlab
+echo "🔄 [Bước 5] Đang Recreate container GitLab với phiên bản mới..."
+docker compose --env-file .env up -d --force-recreate gitlab
 
 echo ""
 echo "⏳ Đang theo dõi trạng thái khởi động của GitLab..."
